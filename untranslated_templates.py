@@ -123,8 +123,8 @@ def main(w):
 Pages missing in {{{{lang info|{lang}}}}}: '''<onlyinclude>{count}</onlyinclude>''' in total. Data as of {date}.
 
 ; See also
-* [[TFW:Reports/All articles/{lang}|All articles in {{{{lang name|name|{lang}}}}}]]
-* [[TFW:Reports/Missing translations/{lang}|Missing article translations in {{{{lang name|name|{lang}}}}}]]
+* [[Project:Reports/All articles/{lang}|All articles in {{{{lang name|name|{lang}}}}}]]
+* [[Project:Reports/Missing translations/{lang}|Missing article translations in {{{{lang name|name|{lang}}}}}]]
 * [[Special:RecentChangesLinked/Project:Reports/All articles/{lang}|Recent changes to articles in {{{{lang name|name|{lang}}}}}]]
 
 == List ==""".format(
@@ -142,7 +142,7 @@ Pages missing in {{{{lang info|{lang}}}}}: '''<onlyinclude>{count}</onlyinclude>
 
 if __name__ == '__main__':
   verbose = True
-  w = wiki.Wiki('https://wiki.teamfortress.com/w/api.php')
+  w = wiki.Wiki()
   with open('wiki_untranslated_templates.txt', 'w') as f:
     for lang, output in main(w):
       f.write('\n===== %s =====\n' % lang)

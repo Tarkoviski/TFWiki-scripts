@@ -79,7 +79,7 @@ Categories missing in {{{{lang info|{lang}}}}}: '''<onlyinclude>{count}</onlyinc
 
 if __name__ == '__main__':
   verbose = True
-  w = wiki.Wiki('https://wiki.teamfortress.com/w/api.php')
+  w = wiki.Wiki()
   with open('wiki_missing_categories.txt', 'w') as f:
     for lang, output in main(w):
       f.write('\n===== %s =====\n' % lang)

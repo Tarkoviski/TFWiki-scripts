@@ -4,7 +4,7 @@ from wikitools.page import Page
 
 verbose = False
 LANGS = ['ar', 'cs', 'da', 'de', 'en', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'ko', 'nl', 'no', 'pl', 'pt', 'pt-br', 'ro', 'ru', 'sv', 'tr', 'zh-hans', 'zh-hant']
-NAMESPACES = ['Main', 'TFW', 'Help', 'File', 'Template']
+NAMESPACES = ['Main', 'Project', 'Help', 'File', 'Template']
 
 excluded_templates = [
   # The class hat tables aren't really navboxes, even though they call {{Navbox}}
@@ -174,7 +174,7 @@ There are <onlyinclude>{total_count}</onlyinclude> pages which have too many / t
 
 if __name__ == '__main__':
   verbose = True
-  w = wiki.Wiki('https://wiki.teamfortress.com/w/api.php')
+  w = wiki.Wiki()
   with open('wiki_navboxes.txt', 'w') as f:
     f.write(main(w))
   print(f'Article written to {f.name}')

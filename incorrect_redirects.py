@@ -4,7 +4,7 @@ from wikitools.page import Page
 
 verbose = False
 LANGS = ['ar', 'cs', 'da', 'de', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'ko', 'nl', 'no', 'pl', 'pt', 'pt-br', 'ro', 'ru', 'sv', 'tr', 'zh-hans', 'zh-hant']
-NAMESPACES = ['Main', 'TFW', 'Help', 'Category']
+NAMESPACES = ['Main', 'Project', 'Help', 'Category']
 
 def pagescraper(page, english_redirects, lang_redirects, bad_redirects):
   link = next(page.get_links(namespaces=NAMESPACES), None)
@@ -35,7 +35,7 @@ def main(w):
         if verbose:
           print(f'{page.title} does not correspond to an english redirect')
         continue
-      
+
       lang_target = lang_redirects[language][page]
       english_target = english_redirects[page.basename]
 
@@ -78,7 +78,7 @@ def main(w):
 
 if __name__ == '__main__':
   verbose = True
-  w = wiki.Wiki('https://wiki.teamfortress.com/w/api.php')
+  w = wiki.Wiki()
   with open('wiki_incorrect_redirects.txt', 'w') as f:
     f.write(main(w))
   print(f'Article written to {f.name}')

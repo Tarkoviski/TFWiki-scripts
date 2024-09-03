@@ -99,7 +99,7 @@ if __name__ == '__main__':
   modules_to_run = []
 
   if event == 'schedule':
-    root = 'Team Fortress Wiki:Reports'
+    root = 'Project:Reports'
     summary = 'Automatic update via https://github.com/jbzdarkid/TFWiki-scripts'
 
     # Determine which reports to run -- note that the weekly and monthly cadences don't necessarily line up.
@@ -110,7 +110,7 @@ if __name__ == '__main__':
       modules_to_run += monthly_reports.keys()
 
   elif event == 'pull_request':
-    root = 'User:Darkid/Reports'
+    root = f'User:{environ["WIKI_USERNAME"]}/Reports'
     summary = 'Test update via https://github.com/jbzdarkid/TFWiki-scripts'
 
     merge_base = check_output(['git', 'merge-base', 'HEAD', 'origin/' + environ['GITHUB_BASE_REF']], text=True).strip()
@@ -138,12 +138,12 @@ if __name__ == '__main__':
         modules_to_run.append(file)
 
   elif event == 'workflow_dispatch':
-    root = 'User:Darkid/Reports'
+    root = f'User:{environ["WIKI_USERNAME"]}/Reports'
     summary = 'Test update via https://github.com/jbzdarkid/TFWiki-scripts'
     modules_to_run = all_reports.keys() # On manual triggers, run everything
 
   elif event == 'local_run':
-    w = wiki.Wiki('https://wiki.teamfortress.com/w/api.php')
+    w = wiki.Wiki()
     for report in all_reports:
       # Root and summary don't matter because we can't publish anyways.
       publish_report(w, report, all_reports[report], '', '')
@@ -153,7 +153,7 @@ if __name__ == '__main__':
     print(f'Not sure what to run in response to {event}')
     exit(1)
 
-  w = wiki.Wiki('https://wiki.teamfortress.com/w/api.php')
+  w = wiki.Wiki()
   if not w.login(environ['WIKI_USERNAME'], environ['WIKI_PASSWORD']):
     exit(1)
 

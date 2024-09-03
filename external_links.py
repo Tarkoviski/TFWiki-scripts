@@ -149,7 +149,7 @@ def main(w):
   output += '== Suspicious links ==\n'
   for link in links:
     suspicious = False
-    for domain in ['wiki.tf2.com', 'wiki.teamfortress.com', 'wiki.tf', 'pastie', 'paste']:
+    for domain in ['theportalwiki.com', 'theportalwiki.net', 'pastie', 'paste']:
       if domain in link:
         suspicious = True
         break
@@ -164,7 +164,7 @@ def main(w):
 
 if __name__ == '__main__':
   verbose = True
-  w = wiki.Wiki('https://wiki.teamfortress.com/w/api.php')
+  w = wiki.Wiki()
   with open('wiki_external_links.txt', 'w') as f:
     f.write(main(w))
   print(f'Article written to {f.name}')

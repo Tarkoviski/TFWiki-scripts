@@ -3,7 +3,7 @@ from wikitools import wiki
 from wikitools.page import Page
 
 verbose = False
-NAMESPACES = ['Main', 'TFW', 'Help', 'File', 'Category']
+NAMESPACES = ['Main', 'Project', 'Help', 'File', 'Category']
 
 def main(w):
   wanted_templates = []
@@ -11,7 +11,7 @@ def main(w):
     use_count = 0
     for namespace in NAMESPACES:
       for page in Page(w, template).get_transclusions(namespace=namespace):
-        if page.title.startswith('Team Fortress Wiki:Discussion'):
+        if page.title.startswith('Portal Wiki:Discussion'):
           continue
         use_count += 1
 
@@ -34,7 +34,7 @@ List of all <onlyinclude>{count}</onlyinclude> broken template transclusions (us
 
 if __name__ == '__main__':
   verbose = True
-  w = wiki.Wiki('https://wiki.teamfortress.com/w/api.php')
+  w = wiki.Wiki()
   with open('wiki_wanted_templates.txt', 'w') as f:
     f.write(main(w))
   print(f'Article written to {f.name}')

@@ -1,3 +1,4 @@
+from os import environ
 from re import finditer
 from requests.exceptions import RequestException
 import requests
@@ -6,9 +7,16 @@ from .page import Page
 from .zip_dict import ZipDict
 
 class Wiki:
-  def __init__(self, api_url):
-    self.api_url = api_url
-    self.wiki_url = api_url.replace('api.php', 'index.php')
+  def __init__(self, api_url=None):
+    env_api_url = environ.get("WIKI_API_URL")
+    if env_api_url:
+      self.api_url = env_api_url
+    elif api_url:
+      self.api_url = api_url
+    else:
+      raise ValueError("No API URL provided. Please set the 'WIKI_API_URL' environment variable or provide a value for the 'api_url' argument")
+
+    self.wiki_url = self.api_url.replace("api.php", "index.php")
     self.lgtoken = None
     self.page_text_cache = {}
     self.page_html_cache = ZipDict()
@@ -104,9 +112,7 @@ class Wiki:
       siprop='namespaces'
     ):
       namespaces[namespace['*']] = namespace['id']
-    namespaces['Main'] = namespaces['']
-    if 'Team Fortress Wiki' in namespaces:
-      namespaces['TFW'] = namespaces['Team Fortress Wiki']
+    namespaces.update({'Main': 0, 'Project': 4, 'Project talk': 5})
     return namespaces
 
   def get_all_templates(self):

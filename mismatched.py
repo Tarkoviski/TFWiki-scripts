@@ -162,12 +162,12 @@ def pagescraper(page, translation_data):
 def page_iter(w):
   for page in w.get_all_pages(namespaces=['Main', 'File', 'Template', 'Help', 'Category']):
     yield page
-  
+
 def main(w):
   translation_data = {lang: [] for lang in LANGS}
   with pagescraper_queue(pagescraper, translation_data) as pages:
     for page in page_iter(w):
-      if page.title.startswith('Team Fortress Wiki:Discussion'):
+      if page.title.startswith('Portal Wiki:Discussion'):
         continue
       if page.title.endswith(' 3D.jpg') or page.title.endswith(' 3D.png'):
         continue
@@ -207,7 +207,7 @@ def main(w):
 
 if __name__ == '__main__':
   verbose = True
-  w = wiki.Wiki('https://wiki.teamfortress.com/w/api.php')
+  w = wiki.Wiki()
   with open('wiki_mismatched_parenthesis.txt', 'w', encoding='utf-8') as f:
     f.write(main(w))
   print(f'Article written to {f.name}')

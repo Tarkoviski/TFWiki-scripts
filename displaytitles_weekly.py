@@ -15,7 +15,7 @@ def main(w):
 
 if __name__ == '__main__':
   verbose = True
-  w = wiki.Wiki('https://wiki.teamfortress.com/w/api.php')
+  w = wiki.Wiki()
   with open('wiki_displaytitles.txt', 'w', encoding='utf-8') as f:
     f.write(main(w))
   print(f'Article written to {f.name}')

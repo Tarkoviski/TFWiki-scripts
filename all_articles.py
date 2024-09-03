@@ -44,7 +44,7 @@ All articles in {{{{lang info|{lang}}}}}; '''<onlyinclude>{count}</onlyinclude>'
 {{{{DISPLAYTITLE: {count} pages in {{{{lang name|name|en}}}}}}}}
 List of all English articles; <onlyinclude>{count}</onlyinclude> in total. Data as of {date}.
 
-* ''See also:'' [[Special:RecentChangesLinked/Team Fortress Wiki:Reports/All articles/en|Recent changes to English articles]]
+* ''See also:'' [[Special:RecentChangesLinked/Project:Reports/All articles/en|Recent changes to English articles]]
 
 == List ==""".format(
     count=len(all_english_pages),
@@ -58,7 +58,7 @@ List of all English articles; <onlyinclude>{count}</onlyinclude> in total. Data 
 
 if __name__ == '__main__':
   verbose = True
-  w = wiki.Wiki('https://wiki.teamfortress.com/w/api.php')
+  w = wiki.Wiki()
   with open('wiki_all_articles.txt', 'w') as f:
     for lang, output in main(w):
       f.write(f'\n===== {lang} =====\n')
