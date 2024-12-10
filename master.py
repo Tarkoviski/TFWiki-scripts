@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 import importlib
 from os import environ
+from random import shuffle
 from subprocess import check_output
 from sys import stdout
 from traceback import print_exc
@@ -11,12 +12,11 @@ import open_pr_comment
 
 # Reports I want:
 # Now that I have wikitext caching, many things are faster. Write a report for Redirects which link to non-existant subsections
-# images without licensing?
 # Quotations which use quote characters
 # Using {{lang}} and {{if lang}} on non-template pages -> this is apparently somewhat common now to make copy/paste editing easier
 # Pages which link to disambig pages not in hatnote/see also
 # Just... a summary of every single external link. Maybe just 'count per domain' and then list the top 10 pages? I'm finding a LOT of sus links, and it's only the ones that are *broken*.
-# Lang template mis-ordering and lang-template duplicate keys
+# {{lang}} template mis-ordering and lang-template duplicate keys
 # Templates sorted by usage and protect status
 # A 'missing translations' report but for dictionary entries (maybe sorted by usage, too?)
 # A report for "Edits on talkpages (not in the "user talk" namespace) in the past few days", so people can track active discussions?
@@ -50,6 +50,7 @@ def publish_report(w, module, report_name, root, summary):
     report_output = importlib.import_module(module).main(w)
 
     if isinstance(report_output, list):
+      shuffle(report_output) # Shuffle the order so that we don't always upload the same language first, to ensure even coverage of 502s
       for lang, output in report_output:
         link_map[lang] = edit_or_save(f'{root}/{report_name}/{lang}', f'{report_file_name}_{lang}.txt', output, summary)
     else:
@@ -76,6 +77,7 @@ weekly_reports = {
   'incorrectly_categorized': 'Pages with incorrect categorization',
   'incorrectly_linked': 'Pages with incorrect links',
   'mismatched_weekly': 'Mismatched parenthesis',
+  'missing_translations_weekly': 'Missing translations/sorted',
   'navboxes': 'Pages which are missing navboxes',
   'overtranslated': 'Pages with no english equivalent',
   'wanted_templates': 'Wanted templates',
@@ -89,6 +91,7 @@ monthly_reports = {
   'external_links2': 'External links',
   'mismatched': 'Mismatched parenthesis',
   'undocumented_templates': 'Undocumented templates',
+  'unlicensed_images': 'Unlicensed images',
   'unused_files': 'Unused files',
 }
 
@@ -146,7 +149,9 @@ if __name__ == '__main__':
     w = wiki.Wiki()
     for report in all_reports:
       # Root and summary don't matter because we can't publish anyways.
+      print(report)
       publish_report(w, report, all_reports[report], '', '')
+      break
     exit(0)
 
   else:

@@ -1,4 +1,3 @@
-from requests.exceptions import RequestException
 from time import sleep
 import functools
 import requests
@@ -23,7 +22,23 @@ class Page:
     return f'Page(w, {self.title})'
 
   def __le__(self, other):
-    return self.url_title < other.url_title
+    if self.lang == other.lang:
+      return self.url_title <= other.url_title
+    return self.lang == 'en' or (other.lang != 'en' and self.lang < other.lang)
+
+  def __eq__(self, other):
+    try:
+      return self.wiki == other.wiki and self.url_title == other.url_title
+    except AttributeError:
+      return False
+
+  def __hash__(self):
+    return self.url_title.__hash__()
+
+  def join_namespaces(self, namespaces):
+    if not namespaces:
+      return self.wiki.namespaces['Main']
+    return '|'.join((str(self.wiki.namespaces[ns]) for ns in namespaces))
 
   def get_wiki_text(self):
     cached_text = self.wiki.page_text_cache.get(self.title, None)
@@ -37,7 +52,7 @@ class Page:
       text = raw['parse']['wikitext']['*']
       self.wiki.page_text_cache[self.title] = text
       return text
-    except RequestException:
+    except requests.exceptions.RequestException:
       return '' # Unable to fetch page contents, pretend it's empty
 
   def get_raw_html(self):
@@ -48,7 +63,7 @@ class Page:
       r = requests.get(self.wiki.wiki_url, allow_redirects=True, params={'title': self.url_title})
       self.wiki.page_html_cache[self.title] = r.text
       return r.text
-    except RequestException:
+    except requests.exceptions.RequestException:
       return '' # Unable to fetch page contents, pretend it's empty
 
   def get_page_url(self, **kwargs):
@@ -63,22 +78,19 @@ class Page:
   def get_transclusion_count(self):
     return sum(1 for _ in self.get_transclusions())
 
-  def get_transclusions(self, *, namespace='Main'):
+  def get_transclusions(self, *, namespaces=None):
     for entry in self.wiki.get_with_continue('query', 'embeddedin',
       list='embeddedin',
-      einamespace=self.wiki.namespaces[namespace],
+      einamespace=self.join_namespaces(namespaces),
       eilimit=500,
       eititle=self.url_title,
     ):
       yield Page(self.wiki, entry['title'], entry)
 
   def get_links(self, *, namespaces=None):
-    if namespaces is None:
-      namespaces = ['Main']
-    namespace_query = '|'.join((str(self.wiki.namespaces[ns]) for ns in namespaces))
     for entry in self.wiki.get_with_continue('query', 'pages',
       generator='links',
-      gplnamespace=namespace_query,
+      gplnamespace=self.join_namespaces(namespaces),
       gpllimit=500,
       titles=self.url_title,
     ):
@@ -99,25 +111,16 @@ class Page:
     if len(text) > 3000 * 1000: # 3 KB
       text = '<span class="error">Warning: Report truncated to 3 KB</span>\n' + text[:3000 * 1000]
 
-    # We would rather not lose all our hard work, so we try pretty hard to make the edit succeed.
-    i = 0
-    while True:
-      try:
-        data = self.wiki.post_with_csrf('edit',
-          title=self.url_title,
-          text=text,
-          summary=summary,
-          bot=bot,
-        )
-        break
-      except Exception as e:
-        print(f'Attempt {i} failed:\n{e}')
-        if i < 5:
-          i += 1
-          sleep(30)
-        else:
-          print(f'Failed to edit {self.title}:\n{e}')
-          return None
+    try:
+      data = self.wiki.post_with_csrf('edit',
+        title=self.url_title,
+        text=text,
+        summary=summary,
+        bot=bot,
+      )
+    except Exception as e:
+      print(f'Failed to edit {self.title}:\n{e}')
+      return None
 
     if 'error' in data:
       print(f'Failed to edit {self.title}:')
@@ -138,6 +141,8 @@ class Page:
       return self.wiki.wiki_url + '?diff=' + str(data['edit']['newrevid'])
 
   def upload(self, fileobj, comment=''):
+    if not self.title.startswith('File:'):
+      print(f'WARNING: Page title "{self.title}" is not in the file namespace, page edits will not work properly')
     if fileobj.mode != 'rb':
       print(f'Failed to upload {self.title}, file must be opened in rb (was {fileobj.mode})')
       return

@@ -3,7 +3,6 @@ from wikitools import wiki
 from wikitools.page import Page
 
 verbose = False
-LANGS = ['ar', 'cs', 'da', 'de', 'en', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'ko', 'nl', 'no', 'pl', 'pt', 'pt-br', 'ro', 'ru', 'sv', 'tr', 'zh-hans', 'zh-hant']
 NAMESPACES = ['Main', 'Project', 'Help', 'File', 'Template']
 
 excluded_templates = [
@@ -67,7 +66,7 @@ def pagescraper(navbox, navbox_templates):
   transclusions = []
   for namespace in NAMESPACES:
     links.extend(navbox.get_links(namespaces=[namespace]))
-    transclusions.extend(navbox.get_transclusions(namespace=namespace))
+    transclusions.extend(navbox.get_transclusions(namespaces=[namespace]))
   navbox_templates[navbox.title] = [
     set(link.title for link in links),
     set(trans.title for trans in transclusions),
@@ -80,7 +79,7 @@ def main(w):
   template_navbox = Page(w, 'Template:Navbox')
 
   with pagescraper_queue(pagescraper, navbox_templates) as navboxes:
-    for page in template_navbox.get_transclusions(namespace='Template'):
+    for page in template_navbox.get_transclusions(namespaces=['Template']):
       if page.title.lower().startswith('template:navbox'):
         continue # Exclude alternative navbox templates
       if page.title.lower().endswith('sandbox'):
@@ -107,24 +106,19 @@ def main(w):
     for template in navbox_templates:
       links, transclusions = navbox_templates[template]
 
-      basename, _, lang = page.title.rpartition('/')
-      if lang not in LANGS:
-        lang = 'en'
-        basename = page.title
-
       # Some additional manual removals
-      if basename in excluded_pages.get(template, []):
+      if page.basename in excluded_pages.get(template, []):
         continue
 
       # Each page that the navbox links to should also transclude the template.
-      if basename in links:
+      if page.basename in links:
         expected_navboxes += 1
         if page.title not in transclusions:
           page_missing_navboxes.append(template)
 
       # Each page that transcludes the navbox should be linked from the navbox
       if page.title in transclusions:
-        if basename not in links:
+        if page.basename not in links:
           page_extra_navboxes.append(template)
 
     # Some pages are too generic, and are linked to by many navboxes. If a page would have more than 5 navboxes,

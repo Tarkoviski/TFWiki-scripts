@@ -7,7 +7,7 @@ LANGS = ['ar', 'cs', 'da', 'de', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'ko', 'nl',
 
 def main(w):
   non_article_categories = set()
-  for page in Page(w, 'Template:Non-article category').get_transclusions(namespace='Category'):
+  for page in Page(w, 'Template:Non-article category').get_transclusions(namespaces=['Category']):
     non_article_categories.add(page.title)
   if verbose:
     print(f'Found {len(non_article_categories)} non-article categories')
@@ -20,9 +20,8 @@ def main(w):
     if page.title in non_article_categories:
       continue # Tracking/maintenance/user categories
 
-    basename, _, lang = page.title.rpartition('/')
-    if lang in LANGS:
-      lang_cats[lang].add(basename)
+    if page.lang != 'en':
+      lang_cats[page.lang].add(page.basename)
     else:
       is_empty = next(w.get_all_category_pages(page.title), signal) == signal
       if is_empty:
